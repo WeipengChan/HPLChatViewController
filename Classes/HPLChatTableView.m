@@ -135,6 +135,7 @@
 
             if([data.date timeIntervalSinceDate:last] > self.groupInterval || !lastData || data.messageStatus != lastData.messageStatus || data.type != lastData.type) {
                 [currentSection addObject:data];
+                data.indexPath = [NSIndexPath indexPathForItem:[currentSection count]-1 inSection:[_chatSection count]-1];
                 lastData = data;
             } else {
                 NSString *newText = [NSString stringWithFormat:@"%@\n\n%@", lastData.text, data.text];
@@ -152,6 +153,38 @@
         [self scrollToBottomAnimated:YES];
     }
 }
+
+- (void)appendData:(HPLChatData *) data withRowAnimation:(UITableViewRowAnimation)animation
+{
+    NSInteger section;
+    HPLChatData *lastData = nil;
+    NSMutableArray *currentSection = nil;
+
+    if ([_chatSection count]) {
+        section = [_chatSection count] - 1;
+        currentSection = (NSMutableArray *)[_chatSection lastObject];
+        if ([currentSection count]) {
+            lastData = (HPLChatData *)[currentSection lastObject];
+        }
+    }
+    
+    [self beginUpdates];
+
+    if (lastData && [data.date timeIntervalSinceDate:lastData.date] > self.snapInterval)
+    {
+        currentSection = [[NSMutableArray alloc] init];
+        [self.chatSection addObject:currentSection];
+        section = [_chatSection count] - 1;
+        NSIndexSet * indexSet = [NSIndexSet indexSetWithIndex:section];
+        [self insertSections:indexSet withRowAnimation:animation];
+    }
+    
+    [currentSection addObject:data];
+    data.indexPath = [NSIndexPath indexPathForItem:([currentSection count] - 1) inSection:section];
+    [self insertRowsAtIndexPaths:[NSArray arrayWithObject:data.indexPath] withRowAnimation:animation];
+    [self endUpdates];
+}
+
 
 -(void)scrollToBottomAnimated:(BOOL)animated {
     NSInteger sectionCount = [self numberOfSections];

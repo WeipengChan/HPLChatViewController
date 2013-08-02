@@ -60,6 +60,11 @@ typedef enum _HPLChatMessageStatus {
 @property (readwrite, nonatomic) HPLChatMessageStatus messageStatus;
 
 /**
+ IndexPath of ChatData's location in the ChatTableView; can be used /w reloadRowsAtIndexPaths
+ */
+@property (nonatomic, strong) NSIndexPath * indexPath;
+
+/**
  Initalizers
  */
 - (id)initWithText:(NSString *)text date:(NSDate *)date type:(HPLChatType)type;
