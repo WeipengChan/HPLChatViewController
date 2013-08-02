@@ -138,8 +138,13 @@
 }
 
 - (BOOL) canPerformAction:(SEL)action withSender:(id)sender {
-    if (action == @selector(copy:))
-        return YES;
+    if (action == @selector(copy:)) {
+        if ([_data.view isKindOfClass:[UILabel class]] ||
+            [_data.view isKindOfClass:[UIImageView class]] ||
+            [_data.view isKindOfClass:[UIImage class]])        
+            return YES;
+        return NO;
+    }
     
     return [super canPerformAction:action withSender:sender];
 }
