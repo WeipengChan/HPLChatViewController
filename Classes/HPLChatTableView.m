@@ -133,7 +133,7 @@
                 [self.chatSection addObject:currentSection];
             }
 
-            if([data.date timeIntervalSinceDate:last] > self.groupInterval || !lastData || data.messageStatus != lastData.messageStatus || data.type != lastData.type) {
+            if([data.date timeIntervalSinceDate:last] >= self.groupInterval || !lastData || data.messageStatus != lastData.messageStatus || data.type != lastData.type) {
                 [currentSection addObject:data];
                 data.indexPath = [NSIndexPath indexPathForItem:[currentSection count]-1 inSection:[_chatSection count]-1];
                 lastData = data;
