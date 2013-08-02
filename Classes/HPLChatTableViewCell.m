@@ -70,7 +70,7 @@
             self.bubbleView = self.data.bubbleView;
         } else {
             self.bubbleView = [[UIView alloc] init];
-            self.bubbleView.backgroundColor = [UIColor whiteColor];
+            self.bubbleView.backgroundColor = [UIColor clearColor];
         }
         [self addSubview:self.bubbleView];
     }
