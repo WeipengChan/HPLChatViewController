@@ -28,6 +28,7 @@ typedef enum _HPLChatTypingType
 @property (nonatomic) BOOL showAvatars;
 @property (nonatomic) BOOL scrollOnActivity;
 
--(void)scrollToBottomAnimated:(BOOL)animated;
+- (void)scrollToBottomAnimated:(BOOL)animated;
+- (void)appendData:(HPLChatData *)data withRowAnimation:(UITableViewRowAnimation)animation;
 
 @end
