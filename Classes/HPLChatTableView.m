@@ -135,7 +135,8 @@
 
             if([data.date timeIntervalSinceDate:last] >= self.groupInterval || !lastData || data.messageStatus != lastData.messageStatus || data.type != lastData.type) {
                 [currentSection addObject:data];
-                data.indexPath = [NSIndexPath indexPathForItem:[currentSection count]-1 inSection:[_chatSection count]-1];
+                // indexPath is +1 here because 0 is used for the section's date header
+                data.indexPath = [NSIndexPath indexPathForItem:[currentSection count] inSection:[_chatSection count]-1];
                 lastData = data;
             } else {
                 NSString *newText = [NSString stringWithFormat:@"%@\n\n%@", lastData.text, data.text];
@@ -156,32 +157,35 @@
 
 - (void)appendData:(HPLChatData *) data withRowAnimation:(UITableViewRowAnimation)animation
 {
-    NSInteger section;
+    if (! data)
+        return;
+    
+    BOOL existingSection = YES;
     HPLChatData *lastData = nil;
     NSMutableArray *currentSection = nil;
-
-    if ([_chatSection count]) {
-        section = [_chatSection count] - 1;
-        currentSection = (NSMutableArray *)[_chatSection lastObject];
-        if ([currentSection count]) {
-            lastData = (HPLChatData *)[currentSection lastObject];
-        }
-    }
+    
+    currentSection = (NSMutableArray *)[_chatSection lastObject];
+    lastData = (HPLChatData *)[currentSection lastObject];
     
     [self beginUpdates];
 
-    if (lastData && [data.date timeIntervalSinceDate:lastData.date] > self.snapInterval)
+    if (!currentSection || (lastData && [data.date timeIntervalSinceDate:lastData.date] > self.snapInterval))
     {
+        existingSection = NO;
         currentSection = [[NSMutableArray alloc] init];
-        [self.chatSection addObject:currentSection];
-        section = [_chatSection count] - 1;
-        NSIndexSet * indexSet = [NSIndexSet indexSetWithIndex:section];
+        [_chatSection addObject:currentSection];
+        NSIndexSet * indexSet = [NSIndexSet indexSetWithIndex:([_chatSection count] - 1)];
         [self insertSections:indexSet withRowAnimation:animation];
     }
     
     [currentSection addObject:data];
-    data.indexPath = [NSIndexPath indexPathForItem:([currentSection count] - 1) inSection:section];
-    [self insertRowsAtIndexPaths:[NSArray arrayWithObject:data.indexPath] withRowAnimation:animation];
+    
+    // indexPath is +1 here because 0 is used for the section's date header
+    data.indexPath = [NSIndexPath indexPathForItem:[currentSection count] inSection:([_chatSection count] - 1)];
+
+    if (existingSection)
+        [self insertRowsAtIndexPaths:[NSArray arrayWithObject:data.indexPath] withRowAnimation:animation];
+    
     [self endUpdates];
 }
 
