@@ -155,6 +155,20 @@
     }
 }
 
+- (void)removeData:(NSIndexPath *)indexPath {
+
+    [self beginUpdates];
+    
+    NSMutableArray * section = [self.chatSection objectAtIndex:indexPath.section];
+
+    HPLChatData * data = [section objectAtIndex:indexPath.row - 1];
+    [section removeObject:data];
+    [self.chatDataSource removeData:data];
+    [self deleteRowsAtIndexPaths:[NSArray arrayWithObject:data.indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    [self endUpdates];
+    [self reloadData];
+}
+
 - (void)appendData:(HPLChatData *) data withRowAnimation:(UITableViewRowAnimation)animation
 {
     if (! data)
@@ -200,7 +214,7 @@
     NSInteger rowCount = [self numberOfRowsInSection:sectionCount - 1];
 
     NSIndexPath* scrollTo = [NSIndexPath indexPathForRow:rowCount-1 inSection:sectionCount - 1];
-    [self scrollToRowAtIndexPath:scrollTo atScrollPosition:UITableViewScrollPositionTop animated:animated];
+    [self scrollToRowAtIndexPath:scrollTo atScrollPosition:UITableViewScrollPositionBottom animated:animated];
 }
 
 #pragma mark - UITableViewDelegate implementation
