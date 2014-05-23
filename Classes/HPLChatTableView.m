@@ -133,8 +133,10 @@
                 [self.chatSection addObject:currentSection];
             }
 
-            if([data.date timeIntervalSinceDate:last] > self.groupInterval || !lastData || data.messageStatus != lastData.messageStatus || data.type != lastData.type) {
+            if([data.date timeIntervalSinceDate:last] >= self.groupInterval || !lastData || data.messageStatus != lastData.messageStatus || data.type != lastData.type) {
                 [currentSection addObject:data];
+                // indexPath is +1 here because 0 is used for the section's date header
+                data.indexPath = [NSIndexPath indexPathForItem:[currentSection count] inSection:[_chatSection count]-1];
                 lastData = data;
             } else {
                 NSString *newText = [NSString stringWithFormat:@"%@\n\n%@", lastData.text, data.text];
@@ -153,6 +155,55 @@
     }
 }
 
+- (void)removeData:(NSIndexPath *)indexPath {
+
+    [self beginUpdates];
+    
+    NSMutableArray * section = [self.chatSection objectAtIndex:indexPath.section];
+
+    HPLChatData * data = [section objectAtIndex:indexPath.row - 1];
+    [section removeObject:data];
+    [self.chatDataSource removeData:data];
+    [self deleteRowsAtIndexPaths:[NSArray arrayWithObject:data.indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    [self endUpdates];
+    [self reloadData];
+}
+
+- (void)appendData:(HPLChatData *) data withRowAnimation:(UITableViewRowAnimation)animation
+{
+    if (! data)
+        return;
+    
+    BOOL existingSection = YES;
+    HPLChatData *lastData = nil;
+    NSMutableArray *currentSection = nil;
+    
+    currentSection = (NSMutableArray *)[_chatSection lastObject];
+    lastData = (HPLChatData *)[currentSection lastObject];
+    
+    [self beginUpdates];
+
+    if (!currentSection || (lastData && [data.date timeIntervalSinceDate:lastData.date] > self.snapInterval))
+    {
+        existingSection = NO;
+        currentSection = [[NSMutableArray alloc] init];
+        [_chatSection addObject:currentSection];
+        NSIndexSet * indexSet = [NSIndexSet indexSetWithIndex:([_chatSection count] - 1)];
+        [self insertSections:indexSet withRowAnimation:animation];
+    }
+    
+    [currentSection addObject:data];
+    
+    // indexPath is +1 here because 0 is used for the section's date header
+    data.indexPath = [NSIndexPath indexPathForItem:[currentSection count] inSection:([_chatSection count] - 1)];
+
+    if (existingSection)
+        [self insertRowsAtIndexPaths:[NSArray arrayWithObject:data.indexPath] withRowAnimation:animation];
+    
+    [self endUpdates];
+}
+
+
 -(void)scrollToBottomAnimated:(BOOL)animated {
     NSInteger sectionCount = [self numberOfSections];
 
@@ -163,7 +214,7 @@
     NSInteger rowCount = [self numberOfRowsInSection:sectionCount - 1];
 
     NSIndexPath* scrollTo = [NSIndexPath indexPathForRow:rowCount-1 inSection:sectionCount - 1];
-    [self scrollToRowAtIndexPath:scrollTo atScrollPosition:UITableViewScrollPositionTop animated:animated];
+    [self scrollToRowAtIndexPath:scrollTo atScrollPosition:UITableViewScrollPositionBottom animated:animated];
 }
 
 #pragma mark - UITableViewDelegate implementation

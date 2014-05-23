@@ -70,7 +70,7 @@
             self.bubbleView = self.data.bubbleView;
         } else {
             self.bubbleView = [[UIView alloc] init];
-            self.bubbleView.backgroundColor = [UIColor whiteColor];
+            self.bubbleView.backgroundColor = [UIColor clearColor];
         }
         [self addSubview:self.bubbleView];
     }
@@ -138,8 +138,13 @@
 }
 
 - (BOOL) canPerformAction:(SEL)action withSender:(id)sender {
-    if (action == @selector(copy:))
-        return YES;
+    if (action == @selector(copy:)) {
+        if ([_data.view isKindOfClass:[UILabel class]] ||
+            [_data.view isKindOfClass:[UIImageView class]] ||
+            [_data.view isKindOfClass:[UIImage class]])        
+            return YES;
+        return NO;
+    }
     
     return [super canPerformAction:action withSender:sender];
 }
